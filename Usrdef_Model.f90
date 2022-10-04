@@ -73,7 +73,12 @@ INTEGER :: iproc
 !------------------
 !
 
-IF (ciffile%status.EQ.'W') cold_start = .TRUE.
+IF (ciffile%status.EQ.'W') then
+   write(*,*) "It s a cold start"
+   cold_start = .TRUE.
+else
+   write(*,*) "It s a warm start"
+endif   
 
 !
 !3. Log files
@@ -165,9 +170,9 @@ modform = 'N'
 !
 
 IF (npworld.GT.1) THEN
-   nprocsx = 4
+   nprocsx = 3
 !  ---number of processes in Y-direction
-   nprocsy = 4
+   nprocsy = 3
 ENDIF
 
 !
@@ -223,7 +228,7 @@ iopt_turb_alg = 1
 iopt_turb_iwlim = 0
 
 !---2-D mode o.b.c (0/1)
-iopt_obc_2D = 0
+iopt_obc_2D = 0 !1
 iopt_obc_3D = 0
 
 !---nodal corrections for tides
@@ -234,10 +239,19 @@ iopt_astro_pars = 1
 !
 !---Start/End date (YYYY/MM/DD HH:MM:SS,mmm)
 CStartDateTime(1:19) = '2003/01/01;00:00:00'
-CEndDateTime(1:19)   = '2003/01/10;00:00:00'
+CEndDateTime(1:19)   = '2003/01/02;00:00:00'
 
 !---time step
-timestep = 15.0
+IF (runtitle(6:6).EQ.'1') then
+   timestep = 30.0 !15.0
+else if (runtitle(6:6).EQ.'2') then
+   timestep = 15.0 !15.0   
+else if (runtitle(6:6).EQ.'3') then
+   timestep = 5.0 !15.0   
+else if (runtitle(6:6).EQ.'4') then
+   timestep = 2.0 !15.0
+endif
+
 
 !---counter for 3-D mode
 ic3d = 10
@@ -269,7 +283,7 @@ depmean_cst = 20.0
 zrough_cst = 0.006
 
 !---tidal indices
-index_obc(1) = icon_M2
+index_obc(1) = icon_S2 ! icon_M2
 
 !
 !6. Model I/O file properties
@@ -307,8 +321,8 @@ ntrestart(1:2) = (/0,int_fill/)
 !7. Surface grid parameters
 !--------------------------
 
-surfacegrids(igrd_model,1)%delxdat = 125.0
-surfacegrids(igrd_model,1)%delydat = 125.0
+surfacegrids(igrd_model,1)%delxdat = 1000.0 !250.0
+surfacegrids(igrd_model,1)%delydat = 1000.0 ! 250.0
 surfacegrids(igrd_model,1)%x0dat = 0.0
 surfacegrids(igrd_model,1)%y0dat = 0.0
 
@@ -323,9 +337,9 @@ iopt_out_tsers = 1
 iopt_out_avrgd = 0
 
 !---title for forcing files
-intitle = runtitle(1:5)//runtitle(7:7)
+intitle = runtitle(1:6)//runtitle(7:7)
 !---title for user-output files
-outtitle = runtitle(1:5)//runtitle(7:7)
+outtitle = runtitle(1:6)//runtitle(7:7)
 !---number of output files
 nosetstsr = 1 !MERGE(2,1,iopt_verif.EQ.0)
 novarstsr = 4

@@ -79,16 +79,7 @@ tsrvars%nrank = (/2,2,3,3/)
 !
 !2. Variable indices
 !-------------------
-!
-!IF (iopt_verif.EQ.0) THEN
-!   ivarstsr(1:5,1) = (/2,3,4,5,6/)!,7,8/)
-!   ivarstsr(1,2) = 1!,7,8/)
-!ELSE
 ivarstsr(:,1) = (/1,2,3,4/)!,8/)
-!ivarstsr(:,2) = (/6,7,8,9,10/)!,8/)
-
-! ivarstsr(1:3,2) = (/4,5,6/)!,8/)
-!ENDIF
 
 !
 !3. File parameters
