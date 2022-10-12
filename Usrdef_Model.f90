@@ -238,8 +238,8 @@ iopt_astro_pars = 1
 !-----------------------
 !
 !---Start/End date (YYYY/MM/DD HH:MM:SS,mmm)
-CStartDateTime(1:19) = '2003/01/01;00:00:00'
-CEndDateTime(1:19)   = '2003/01/02;00:00:00'
+CStartDateTime(1:19) = '2007/01/01;00:00:00'
+CEndDateTime(1:19)   = '2007/01/02;00:00:00'
 
 !---time step
 read( runtitle(6:6),*) runid
@@ -321,9 +321,9 @@ iopt_sflux_qshort = 1
 !! Meteo files (ERA5) !!
 IF (iopt_meteo.EQ.1)THEN
 !   WRITE (cyear,'(I4.4)') iyear
-   modfiles(io_metsur,1,1)%status = 'R'
+   modfiles(io_metsur,1,1)%status = 'N'
    modfiles(io_metsur,1,1)%form   = 'N'
-   modfiles(io_metsur,1,1)%filename = '/home/ulg/mast/acapet/Coherens_Forcings/Shading_2007/BCZ_2007.nc'
+   modfiles(io_metsur,1,1)%filename = '/home/acapet/Shading_test/BCZ_2007.nc'
    modfiles(io_metsur,1,1)%tlims = (/0,int_fill,900/)
 ENDIF
 

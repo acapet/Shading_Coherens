@@ -334,10 +334,16 @@ IF (modfiles(iddesc,ifil,1)%iostat.EQ.0) THEN
    t2m_help = scale_and_offset(iunit,tID)
    status = nf90_inq_varid(iunit, "msl", mslID)
    msl_help = scale_and_offset(iunit,mslID)
-   
+
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! AC 12/10/2022 - Only one file for now !
    !time
-   READ (runtitle(1:4),'(I4)') iyear
-   READ (runtitle(5:6),'(I2)') imont
+   !   READ (runtitle(1:4),'(I4)') iyear
+   !   READ (runtitle(5:6),'(I2)') imont
+   iyear  = 2007
+   imont  = 1
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   
    iday = 1
    itime_ref = (/iyear,imont,iday,0,0,0,0/)
    dt = 1.
@@ -370,6 +376,7 @@ IF (modfiles(io_metsur,ifil,1)%iostat.EQ.1) THEN
       time_plus = 0
       record = 1
       status = nf90_close(iunit)
+      !!! AC : The file name here shouldn't be given explicitely, I guess? 
       status = nf90_open('METEO/era5_'//cnextyear//cnextmonth//'.nc', nf90_NoWrite, iunit)
    ENDIF
    CALL add_secs_to_date_int(itime_ref, intdate, time_plus, dt)
