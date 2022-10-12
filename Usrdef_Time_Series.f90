@@ -73,7 +73,7 @@ CALL log_timer_in()
 !-------------------
 
 !---varids and ranks
-tsrvars%ivarid = (/iarr_umvel, iarr_vmvel, iarr_sal, iarr_temp/)
+tsrvars%ivarid = (/iarr_umvel, iarr_vmvel, iarr_temp, iarr_radiance/)
 tsrvars%nrank = (/2,2,3,3/)
 
 !

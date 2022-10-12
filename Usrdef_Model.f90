@@ -102,7 +102,7 @@ levtimer = 3
 !-----------------
 !
 
-IF (npworld.GT.1) nprocscoh = 16
+IF (npworld.GT.1) nprocscoh = 9
 
 
 RETURN
@@ -149,7 +149,7 @@ LOGICAL :: sflag
 !*Local variables
 !
 CHARACTER (LEN=1) :: modform 
-
+REAL              :: runid
 
 procname(pglev+1) = 'usrdef_mod_params'
 CALL log_timer_in()
@@ -180,7 +180,7 @@ ENDIF
 !-----------
 !
 !---Cartesian or spherical (0/1)
-iopt_grid_sph = 0
+iopt_grid_sph = 1
 
 !AC 280922
 !IF (.NOT.sflag) THEN
@@ -228,7 +228,7 @@ iopt_turb_alg = 1
 iopt_turb_iwlim = 0
 
 !---2-D mode o.b.c (0/1)
-iopt_obc_2D = 0 !1
+iopt_obc_2D = 1 !1
 iopt_obc_3D = 0
 
 !---nodal corrections for tides
@@ -242,15 +242,19 @@ CStartDateTime(1:19) = '2003/01/01;00:00:00'
 CEndDateTime(1:19)   = '2003/01/02;00:00:00'
 
 !---time step
-IF (runtitle(6:6).EQ.'1') then
-   timestep = 30.0 !15.0
-else if (runtitle(6:6).EQ.'2') then
-   timestep = 15.0 !15.0   
-else if (runtitle(6:6).EQ.'3') then
-   timestep = 5.0 !15.0   
-else if (runtitle(6:6).EQ.'4') then
-   timestep = 2.0 !15.0
-endif
+read( runtitle(6:6),*) runid
+
+timestep = 4.0
+
+!IF (runtitle(6:6).EQ.'1') then
+!   timestep = 30.0 !15.0
+!else if (runtitle(6:6).EQ.'2') then
+!   timestep = 15.0 !15.0   
+!else if (runtitle(6:6).EQ.'3') then
+!   timestep = 5.0 !15.0   
+!else if (runtitle(6:6).EQ.'4') then
+!   timestep = 2.0 !15.0
+!endif
 
 
 !---counter for 3-D mode
@@ -283,7 +287,7 @@ depmean_cst = 20.0
 zrough_cst = 0.006
 
 !---tidal indices
-index_obc(1) = icon_S2 ! icon_M2
+index_obc(1) = icon_M2 ! icon_M2
 
 !
 !6. Model I/O file properties
@@ -321,10 +325,16 @@ ntrestart(1:2) = (/0,int_fill/)
 !7. Surface grid parameters
 !--------------------------
 
-surfacegrids(igrd_model,1)%delxdat = 1000.0 !250.0
-surfacegrids(igrd_model,1)%delydat = 1000.0 ! 250.0
-surfacegrids(igrd_model,1)%x0dat = 0.0
-surfacegrids(igrd_model,1)%y0dat = 0.0
+! For Orthogonal coordinates
+!surfacegrids(igrd_model,1)%delxdat = 125.0 
+!surfacegrids(igrd_model,1)%delydat = 125.0
+!surfacegrids(igrd_model,1)%x0dat = 0.0
+!surfacegrids(igrd_model,1)%y0dat = 0.0
+! For Spherical coordinates
+surfacegrids(igrd_model,1)%delxdat = 0.0017884 
+surfacegrids(igrd_model,1)%delydat = 0.0011236
+surfacegrids(igrd_model,1)%x0dat = 2.05
+surfacegrids(igrd_model,1)%y0dat = 51.15
 
 !
 !8. User output
@@ -506,7 +516,7 @@ CALL log_timer_in()
 !-----------
 !
 
-sl = 30.0; sr = 35.0
+sl = 35.0; sr = 35.0
 xl = 25000.0; xr = 45000.0
 
 i_210: DO i=1,ncloc
