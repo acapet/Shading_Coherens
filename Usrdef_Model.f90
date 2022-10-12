@@ -306,6 +306,29 @@ modfiles(io_inicon,1,1)%form = 'N'
 !---open boundary conditions (2-D)
 modfiles(io_2uvobc,1,1)%status = 'N'
 
+
+! METEO
+iopt_meteo        = 1
+iopt_meteo_data   = 1
+iopt_meteo_stres  = 1
+iopt_meteo_heat   = 1
+iopt_meteo_precip = 1
+
+iopt_sflux_qshort = 1
+
+! iopt_obc_invbar = 1
+ 
+!! Meteo files (ERA5) !!
+IF (iopt_meteo.EQ.1)THEN
+!   WRITE (cyear,'(I4.4)') iyear
+   modfiles(io_metsur,1,1)%status = 'R'
+   modfiles(io_metsur,1,1)%form   = 'N'
+   modfiles(io_metsur,1,1)%filename = '/home/ulg/mast/acapet/Coherens_Forcings/Shading_2007/BCZ_2007.nc'
+   modfiles(io_metsur,1,1)%tlims = (/0,int_fill,900/)
+ENDIF
+
+
+
 !6.2 Output
 !----------
 !
