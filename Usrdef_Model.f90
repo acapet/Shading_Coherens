@@ -239,7 +239,7 @@ iopt_astro_pars = 1
 !
 !---Start/End date (YYYY/MM/DD HH:MM:SS,mmm)
 CStartDateTime(1:19) = '2007/01/01;00:00:00'
-CEndDateTime(1:19)   = '2007/01/02;00:00:00'
+CEndDateTime(1:19)   = '2008/01/01;00:00:00'
 
 !---time step
 read( runtitle(6:6),*) runid
@@ -312,7 +312,7 @@ iopt_meteo        = 1
 iopt_meteo_data   = 1
 iopt_meteo_stres  = 1
 iopt_meteo_heat   = 1
-iopt_meteo_precip = 1
+iopt_meteo_precip = 0
 
 iopt_sflux_qshort = 1
 
@@ -323,8 +323,17 @@ IF (iopt_meteo.EQ.1)THEN
 !   WRITE (cyear,'(I4.4)') iyear
    modfiles(io_metsur,1,1)%status = 'N'
    modfiles(io_metsur,1,1)%form   = 'N'
-   modfiles(io_metsur,1,1)%filename = '/home/acapet/Shading_test/BCZ_2007.nc'
-   modfiles(io_metsur,1,1)%tlims = (/0,int_fill,900/)
+   modfiles(io_metsur,1,1)%filename = '/home/ulg/mast/acapet/Coherens_Forcings/Shading_2007/BCZ_2007.nc' !/home/acapet/Shading_test/BCZ_2007.nc'
+   modfiles(io_metsur,1,1)%tlims = (/0,int_fill,450/)
+
+!---meteo grid (ecmwf)                                                                                                                                                                                            
+   surfacegrids(igrd_meteo,1)%nhtype = 1
+   surfacegrids(igrd_meteo,1)%n1dat = 3
+   surfacegrids(igrd_meteo,1)%n2dat = 3
+   surfacegrids(igrd_meteo,1)%x0dat = 2.0
+   surfacegrids(igrd_meteo,1)%y0dat = 51.1
+   surfacegrids(igrd_meteo,1)%delxdat = 0.25
+   surfacegrids(igrd_meteo,1)%delydat = 0.25
 ENDIF
 
 
