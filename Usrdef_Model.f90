@@ -67,11 +67,9 @@ IMPLICIT NONE
 !
 INTEGER :: iproc
 
-
 !
 !1. Cold/warm start
 !------------------
-!
 
 IF (ciffile%status.EQ.'W') then
    write(*,*) "It s a cold start"
@@ -83,24 +81,21 @@ endif
 !
 !3. Log files
 !------------
-!
 !---program leveling in log files
 iproc_310: DO iproc=1,npworld
    levprocs_ini(iproc) = 3
-   levprocs_run(iproc) = 3
+   levprocs_run(iproc) = 1
 ENDDO iproc_310
 
 !
 !6. Timing
 !---------
-!
 
 levtimer = 3
 
 !
 !7. Parallel setup
 !-----------------
-!
 
 IF (npworld.GT.1) nprocscoh = 9
 
@@ -159,7 +154,6 @@ modform = 'N'
 !
 !1. Setup flag
 !-------------
-!
 
 !AC 280922
 !sflag = MERGE(.TRUE.,.FALSE.,runtitle(6:6).EQ.'0')
@@ -167,9 +161,9 @@ modform = 'N'
 !
 !2. Process numbers
 !------------------
-!
 
 IF (npworld.GT.1) THEN
+!  ---number of processes in X-direction
    nprocsx = 3
 !  ---number of processes in Y-direction
    nprocsy = 3
@@ -178,7 +172,6 @@ ENDIF
 !
 !3. Switches
 !-----------
-!
 !---Cartesian or spherical (0/1)
 iopt_grid_sph = 1
 
@@ -244,7 +237,7 @@ CEndDateTime(1:19)   = '2008/01/01;00:00:00'
 !---time step
 read( runtitle(6:6),*) runid
 
-timestep = 4.0
+timestep = 4.0*runid
 
 !IF (runtitle(6:6).EQ.'1') then
 !   timestep = 30.0 !15.0
@@ -265,7 +258,7 @@ ic3d = 10
 !---------------------------
 !
 !---grid dimensions
-nc = 321; nr = 321; nz = 15
+nc = int(320/runid)+1; nr = int(320/runid)+1; nz = 15
 
 !---number of river/open sea boundaries
 nosbu = 2*(nr-1)
@@ -363,8 +356,8 @@ ntrestart(1:2) = (/0,int_fill/)
 !surfacegrids(igrd_model,1)%x0dat = 0.0
 !surfacegrids(igrd_model,1)%y0dat = 0.0
 ! For Spherical coordinates
-surfacegrids(igrd_model,1)%delxdat = 0.0017884 
-surfacegrids(igrd_model,1)%delydat = 0.0011236
+surfacegrids(igrd_model,1)%delxdat = 0.0017884*runid 
+surfacegrids(igrd_model,1)%delydat = 0.0011236*runid
 surfacegrids(igrd_model,1)%x0dat = 2.05
 surfacegrids(igrd_model,1)%y0dat = 51.15
 
@@ -384,7 +377,7 @@ intitle = runtitle(1:6)//runtitle(7:7)
 outtitle = runtitle(1:6)//runtitle(7:7)
 !---number of output files
 nosetstsr = 1 !MERGE(2,1,iopt_verif.EQ.0)
-novarstsr = 4
+novarstsr = 2
 
 !nosetsavr = 2
 !novarsavr = 7

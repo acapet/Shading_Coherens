@@ -64,22 +64,20 @@ USE time_routines, ONLY: log_timer_in, log_timer_out
 
 IMPLICIT NONE
 
-
 procname(pglev+1) = 'usrdef_tsr_params'
 CALL log_timer_in()
 
 !
 !1. Output variables
 !-------------------
-
 !---varids and ranks
-tsrvars%ivarid = (/iarr_umvel, iarr_vmvel, iarr_temp, iarr_radiance/)
-tsrvars%nrank = (/2,2,3,3/)
+tsrvars%ivarid = (/iarr_temp, iarr_radiance/)! iarr_umvel, iarr_vmvel, , iarr_radiance
+tsrvars%nrank = (/3,3/)
 
 !
 !2. Variable indices
 !-------------------
-ivarstsr(:,1) = (/1,2,3,4/)!,8/)
+ivarstsr(:,1) = (/1,2/)!,8/)
 
 !
 !3. File parameters
@@ -92,18 +90,17 @@ ivarstsr(:,1) = (/1,2,3,4/)!,8/)
 !    tsr0d(2)%defined = .TRUE.
 !ELSE
 tsr0d(1)%defined = .FALSE.
-tsr2d(1)%defined = .TRUE.
+tsr2d(1)%defined = .FALSE.
 tsr3d(1)%defined = .TRUE.
 !ENDIF
 
 !
 !4. Output grid
 !--------------
-!
 !---first file
 tsrgpars(1)%time_format = 3
 tsrgpars(1)%tlims(1:2)  = (/0,nstep/)
-tsrgpars(1)%tlims(3)    = 120
+tsrgpars(1)%tlims(3)    = 5400 ! 6h for  dt=4s
 !tsrgpars(1)%time_grid   = .TRUE.
     
 !---second file
