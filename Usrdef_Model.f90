@@ -84,7 +84,7 @@ endif
 !---program leveling in log files
 iproc_310: DO iproc=1,npworld
    levprocs_ini(iproc) = 3
-   levprocs_run(iproc) = 1
+   levprocs_run(iproc) = 0
 ENDDO iproc_310
 
 !
@@ -232,7 +232,7 @@ iopt_astro_pars = 1
 !
 !---Start/End date (YYYY/MM/DD HH:MM:SS,mmm)
 CStartDateTime(1:19) = '2007/01/01;00:00:00'
-CEndDateTime(1:19)   = '2008/01/01;00:00:00'
+CEndDateTime(1:19)   = '2007/07/01;00:00:00'
 
 !---time step
 read( runtitle(6:6),*) runid
@@ -364,7 +364,10 @@ surfacegrids(igrd_model,1)%y0dat = 51.15
 !
 !8. User output
 !--------------
-
+iopt_CDF_format = 2   !64 bit, no file size limit (=1,classic)
+iopt_CDF_tlim   = 2
+iopt_CDF_sync   = 1
+iopt_CDF_fill   = 1
 
 !---user output (0/1)
 !AC 280922
@@ -377,7 +380,7 @@ intitle = runtitle(1:6)//runtitle(7:7)
 outtitle = runtitle(1:6)//runtitle(7:7)
 !---number of output files
 nosetstsr = 1 !MERGE(2,1,iopt_verif.EQ.0)
-novarstsr = 2
+novarstsr = 8
 
 !nosetsavr = 2
 !novarsavr = 7
