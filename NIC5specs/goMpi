@@ -1,0 +1,15 @@
+#!/bin/bash
+
+source envload
+make clean
+cp coherensflags.cmp.MPI coherensflags.cmp
+make linux-gfortp
+echo - - - - - - - - - - - 
+echo Usrdef_Model.f90
+diff Usrdef_Model.f90 Usrdef_Model.f90.last
+echo - - - - - - - - - - - 
+echo Usrdef_Time_Series.f90
+diff Usrdef_Time_Series.f90 Usrdef_Time_Series.f90.last
+cp Usrdef_Model.f90 Usrdef_Model.f90.last
+cp Usrdef_Time_Series.f90 Usrdef_Time_Series.f90.last
+sbatch NIC5run

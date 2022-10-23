@@ -82,10 +82,20 @@ endif
 !3. Log files
 !------------
 !---program leveling in log files
-iproc_310: DO iproc=1,npworld
-   levprocs_ini(iproc) = 3
-   levprocs_run(iproc) = 0
-ENDDO iproc_310
+
+
+IF (master) THEN
+   levprocs_ini = 3
+   levprocs_run = 1
+ELSE
+   levprocs_ini = 3
+   levprocs_run = 0
+ENDIF
+
+!iproc_310: DO iproc=1,npworld
+!   levprocs_ini(iproc) = 3
+!   levprocs_run(iproc) = 1
+!ENDDO iproc_310
 
 !
 !6. Timing

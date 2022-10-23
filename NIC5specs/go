@@ -1,0 +1,24 @@
+#!/bin/bash
+
+source envload
+
+if [ $# -eq 1 ]
+then
+    if [$1 -eq c]
+       then
+       make clean
+    fi
+fi
+
+cp coherensflags.cmp.noMPI coherensflags.cmp
+make clean
+make linux-gfortp
+echo - - - - - - - - - - - 
+echo Usrdef_Model.f90
+diff Usrdef_Model.f90 Usrdef_Model.f90.last
+echo - - - - - - - - - - - 
+echo Usrdef_Time_Series.f90
+diff Usrdef_Time_Series.f90 Usrdef_Time_Series.f90.last
+cp Usrdef_Model.f90 Usrdef_Model.f90.last
+cp Usrdef_Time_Series.f90 Usrdef_Time_Series.f90.last
+sbatch NIC5run.single
