@@ -109,7 +109,6 @@ levtimer = 3
 
 IF (npworld.GT.1) nprocscoh = 9
 
-
 RETURN
 
 END SUBROUTINE usrdef_init_params
@@ -167,6 +166,16 @@ modform = 'N'
 
 !AC 280922
 !sflag = MERGE(.TRUE.,.FALSE.,runtitle(6:6).EQ.'0')
+
+
+iopt_MPI_sync = 1
+
+iopt_MPI_comm_scat = 1
+iopt_MPI_comm_gath = 1
+iopt_MPI_comm_exch = 1
+iopt_MPI_comm_all  = 1
+
+iopt_MPI_abort = 0
 
 !
 !2. Process numbers
@@ -242,7 +251,7 @@ iopt_astro_pars = 1
 !
 !---Start/End date (YYYY/MM/DD HH:MM:SS,mmm)
 CStartDateTime(1:19) = '2007/01/01;00:00:00'
-CEndDateTime(1:19)   = '2007/07/01;00:00:00'
+CEndDateTime(1:19)   = '2007/03/01;00:00:00'
 
 !---time step
 read( runtitle(6:6),*) runid
@@ -326,7 +335,7 @@ IF (iopt_meteo.EQ.1)THEN
 !   WRITE (cyear,'(I4.4)') iyear
    modfiles(io_metsur,1,1)%status = 'N'
    modfiles(io_metsur,1,1)%form   = 'N'
-   modfiles(io_metsur,1,1)%filename = '/home/ulg/mast/acapet/Coherens_Forcings/Shading_2007/BCZ_2007.nc' !/home/acapet/Shading_test/BCZ_2007.nc'
+   modfiles(io_metsur,1,1)%filename = '/home/acapet/Shading_test/BCZ_2007.nc' !'/home/ulg/mast/acapet/Coherens_Forcings/Shading_2007/BCZ_2007.nc'
    modfiles(io_metsur,1,1)%tlims = (/0,int_fill,450/)
 
 !---meteo grid (ecmwf)                                                                                                                                                                                            
@@ -554,7 +563,7 @@ CALL log_timer_in()
 !-----------
 !
 
-sl = 35.0; sr = 35.0
+sl = 34.8; sr = 35.0
 xl = 25000.0; xr = 45000.0
 
 i_210: DO i=1,ncloc
@@ -579,6 +588,7 @@ ENDDO i_210
 !
 
 IF (iopt_MPI.EQ.1) THEN
+   write(*,*) 'AC: iopt_MPI was 1. Nhalo:', nhalo, 'nhdens', nhdens
    lbounds = (/1-nhalo,1-nhalo,1/); nhexch = nhdens
    CALL exchange_mod(sal,lbounds,nhexch,iarr_sal)
 ENDIF
