@@ -284,10 +284,13 @@ IF (modfiles(iddesc,ifil,1)%iostat.EQ.0) THEN
    modfiles(iddesc,ifil,1)%iostat = 1
    status = nf90_open(modfiles(iddesc,ifil,1)%filename, nf90_NoWrite, iunit)
 
+!   write(*,*) 'AC: modfiles(iddesc,ifil,1)%filename',modfiles(iddesc,ifil,1)%filename
+!   write(*,*) 'AC: status',status
+   
    !  ---allocate model data array
    IF (ALLOCATED(meteodat)) DEALLOCATE (meteodat)
    ALLOCATE (meteodat(n1dat,n2dat,nodat),STAT=errstat)
-   write(*,*) 'AC: n1dat', n1dat, 'n2dat',n2dat,'nodat',nodat
+!   write(*,*) 'AC: n1dat', n1dat, 'n2dat',n2dat,'nodat',nodat
 
    CALL error_alloc('meteodat',3,(/n1dat,n2dat,nodat/),kndrtype)
    
@@ -355,6 +358,7 @@ IF (modfiles(iddesc,ifil,1)%iostat.EQ.0) THEN
    status = nf90_inq_varid(iunit, "msl", mslID)
    msl_help = scale_and_offset(iunit,mslID)
 
+!   write(*,*) "AC: mslID", mslID
    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    ! AC 12/10/2022 - Only one file for now !
    !time
@@ -371,7 +375,7 @@ IF (modfiles(iddesc,ifil,1)%iostat.EQ.0) THEN
    time_to_add = 0
    time_plus = 0
    status = nf90_inquire_dimension(iunit, timeID, len = maxrecs)
-   print *, 'maxrecs ',maxrecs
+!   print *, 'maxrecs ',maxrecs
    GOTO 999
 ENDIF
 !
@@ -405,19 +409,19 @@ IF (modfiles(io_metsur,ifil,1)%iostat.EQ.1) THEN
    CALL add_secs_to_date_int(itime_ref, intdate, time_plus, dt)
    ciodatetime = convert_date(intdate)
 
-   write(*,*) 'AC: ciodatetime', ciodatetime
+!   write(*,*) 'AC: ciodatetime', ciodatetime
    
    ! ---read values data
    !  ---atmospheric pressure
    help_dat = 0.0
-   write(*,*) 'AC: reading MSL'
-   write(*,*) 'AC: mslID', mslID
-   write(*,*) 'AC: record', record
+!   write(*,*) 'AC: reading MSL'
+!   write(*,*) 'AC: mslID', mslID
+!   write(*,*) 'AC: record', record
 
    status = nf90_get_var(iunit,mslID,help_dat(:,:),start=(/1,1,record/),count=(/n1dat,n2dat,1/))
    help_dat(:,:)=help_dat(:,n2dat:1:-1)
    meteodat(:,:,3) = help_dat(:,:)*msl_help(1)+msl_help(2)
-   write(*,*) 'AC: meteodat(:,:,3)', meteodat(:,:,3)
+!   write(*,*) 'AC: meteodat(:,:,3)', meteodat(:,:,3)
 
    !  ---wind velocities
    help_dat = 0.0
@@ -429,13 +433,13 @@ IF (modfiles(io_metsur,ifil,1)%iostat.EQ.1) THEN
    status = nf90_get_var(iunit,vID,help_dat(:,:),start=(/1,1,record/),count=(/n1dat,n2dat,1/))
    help_dat(:,:)=help_dat(:,n2dat:1:-1)
    meteodat(:,:,2) = help_dat(:,:)*v10_help(1)+v10_help(2)
-   print *, 'uvel, vvel, msl: ', meteodat(1,1,1),meteodat(1,1,2),meteodat(1,1,3)
+!   print *, 'uvel, vvel, msl: ', meteodat(1,1,1),meteodat(1,1,2),meteodat(1,1,3)
    !  ---precipitation
    help_dat = 0.0
    status = nf90_get_var(iunit,tpID,help_dat(:,:),start=(/1,1,record/),count=(/n1dat,n2dat,1/))
    help_dat(:,:)=help_dat(:,n2dat:1:-1)
    precip = help_dat(:,:)*tp_help(1)+tp_help(2)
-   print *, 'precip: ', precip(1:2,1:2)
+!   print *, 'precip: ', precip(1:2,1:2)
    !   ---cloud cover
    ! AC 14102022 : considering tcc instead of lcc, mcc, hcc '
    !help_dat = 0.0
@@ -458,7 +462,7 @@ IF (modfiles(io_metsur,ifil,1)%iostat.EQ.1) THEN
    help_dat(:,:)=help_dat(:,n2dat:1:-1)
    clouddat(:,:) = help_dat(:,:)*tcc_help(1)+tcc_help(2)
 
-   print *, 'clouddata ',clouddat(1:2,1:2)
+!   print *, 'clouddata ',clouddat(1:2,1:2)
    ! ! ! ! ! ! !
    
    !   --- air temperature
@@ -466,13 +470,13 @@ IF (modfiles(io_metsur,ifil,1)%iostat.EQ.1) THEN
    status = nf90_get_var(iunit,tID,help_dat(:,:),start=(/1,1,record/),count=(/n1dat,n2dat,1/))
    help_dat(:,:)=help_dat(:,n2dat:1:-1)
    meteodat(:,:,4) = help_dat(:,:)*t2m_help(1)+t2m_help(2)
-   print *, 'airt ',meteodat(1:2,1:2,4)
+!   print *, 'airt ',meteodat(1:2,1:2,4)
    !   --- dewpoint temperature
    help_dat = 0.0
    status = nf90_get_var(iunit,dID,help_dat(:,:),start=(/1,1,record/),count=(/n1dat,n2dat,1/))
    help_dat(:,:)=help_dat(:,n2dat:1:-1)
    dewt(:,:) = help_dat(:,:)*d2m_help(1)+d2m_help(2)
-   print *, 'dewt ',dewt(1:2,1:2)
+!   print *, 'dewt ',dewt(1:2,1:2)
 
     !3. Convert
     !----------
@@ -482,7 +486,7 @@ IF (modfiles(io_metsur,ifil,1)%iostat.EQ.1) THEN
     
     !  ---temperature
        meteodat(:,:,4) = meteodat(:,:,4) - 273.15
-       print *,'temp after conversion: ', meteodat(1:2,1:2,4)
+!       print *,'temp after conversion: ', meteodat(1:2,1:2,4)
     
     !  ---dewpoint to relative humidity
     !Alduchov, O. A., and R. E. Eskridge, 1996: Improved Magnus' form approximation of saturation vapor pressure. J. Appl. Meteor., 35, 601–609.
@@ -496,7 +500,7 @@ IF (modfiles(io_metsur,ifil,1)%iostat.EQ.1) THEN
                & (243.04 + meteodat(i,j,4))))
        ENDDO j_310
        ENDDO i_310
-       print *,'dewt after conversion: ', meteodat(1:2,1:2,5)
+!       print *,'dewt after conversion: ', meteodat(1:2,1:2,5)
     !  ---cloud cover
     
        i_320: DO i=1,n1dat
