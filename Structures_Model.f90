@@ -4020,13 +4020,13 @@ SUBROUTINE read_mpv
    !                                                                                                                                                                                                                  
    ! Calling program - initialise_model                                                                                                                                                                               
    !                                                                                                                                                                                                                  
-   ! Module calls - check_value_varatts, close_filepars, error_abort,                                                                                                                                                 
-   !                error_alloc_struc, error_value_arr_struc, open_filepars,                                                                                                                                          
-   !                read_glbatts_mod, read_varatts_mod, read_vars,                                                                                                                                                    
-   !                set_modfiles_atts, set_modvars_atts, varatts_init                                                                                                                                                 
-   !                                                                                                                                                                                                                  
-   !************************************************************************                                                                                                                                          
-   !                                                                                                                                                                                                                  
+  ! Module calls - check_value_varatts, close_filepars, error_abort,
+  !                error_alloc_struc, error_value_arr_struc, open_filepars,
+  !                read_glbatts_mod, read_varatts_mod, read_vars,
+  !                set_modfiles_atts, set_modvars_atts, varatts_init
+  !
+  !************************************************************************
+  
    USE datatypes
    USE depths
    USE grid
@@ -4041,10 +4041,9 @@ SUBROUTINE read_mpv
    USE time_routines, ONLY: log_timer_in, log_timer_out
    
    IMPLICIT NONE
-      
-   !                                                                                                                                                                                                                  
-   !*Local variables                                                                                                                                                                                                  
-   !                                                                                                                                                                                                                  
+
+   !*Local variables
+   
    LOGICAL :: header
    INTEGER :: ivar, nocoords1, nocoords2, novars, novars1, novars2
    TYPE (FileParams) :: filepars, filepars1, filepars2
@@ -4053,26 +4052,17 @@ SUBROUTINE read_mpv
 
    procname(pglev+1) = 'read_mpv'
    CALL log_timer_in()
+ 
+   !1. Initialise
 
-   !                                                                                                                                                                                                                  
-   !1. Initialise                                                                                                                                                                                                     
-   !-------------                                                                                                                                                                                                     
-   !                                                                                                                                                                                                                  
-   !1.1 Data attributes                                                                                                                                                                                               
-   !-------------------                                                                                                                                                                                               
-   !
-   header = modfiles(io_mpvcov,1,1)%header
-
-   IF (header) THEN
-
-   !  ---open data file                                                                                                                                                                                               
-      filepars1 = modfiles(io_mpvcov,1,1)
+   filepars1 = modfiles(io_mpvcov,1,1)
       CALL open_filepars(filepars1)
-
-   !  ---file attributes                                                                                                                                                                                              
+      
+      !  ---file attributes
+      
       CALL read_glbatts_mod(filepars1)
 
-   !  ---variable attributes                                                                                                                                                                                          
+      !  ---variable attributes
       nocoords1 = filepars1%nocoords
       novars1 = filepars1%novars
       ALLOCATE (varatts1(novars1),STAT=errstat)
@@ -4081,16 +4071,15 @@ SUBROUTINE read_mpv
       CALL read_varatts_mod(filepars1,varatts1)
    
    ENDIF
+     
+   !!1.2 Model attributes
+   !---file attributes
    
-   !!                                                                                                                                                                                                                  
-   !!1.2 Model attributes                                                                                                                                                                                              
-   !!--------------------                                                                                                                                                                                              
-   !!                                                                                                                                                                                                                  
-   !---file attributes                                                                                                                                                                                                
    filepars2 = modfiles(io_modgrd,1,1)
    CALL set_modfiles_atts(io_modgrd,1,1,filepars2)
-   ! 
-   !---data attributes                                                                                                                                                                                                
+   !
+   !---data attributes
+   
     nocoords2 = filepars2%nocoords
     novars2 = filepars2%novars
    ALLOCATE (varatts2(novars2),STAT=errstat)
@@ -4098,10 +4087,8 @@ SUBROUTINE read_mpv
    CALL varatts_init(varatts2)
    CALL set_modvars_atts(io_modgrd,1,1,filepars2,novars2,varatts2)
 
-   !                                                                                                                                                                                                                  
-   !1.3 Check attributes                                                                                                                                                                                              
-   !--------------------                                                                                                                                                                                              
-   !                                                                                                                                                                                                                  
+   !1.3 Check attributes
+   
    IF (header) THEN
       CALL error_value_arr_struc(nocoords1,'modfiles','nocoords',nocoords2,3,&
                               & (/io_modgrd,1,1/))
@@ -4109,10 +4096,8 @@ SUBROUTINE read_mpv
       CALL error_abort('read_mpv',ierrno_read)
    ENDIF
 
-   !                                                                                                                                                                                                                  
-   !1.4 Variables names used for idenfication                                                                                                                                                                         
-   !-----------------------------------------                                                                                                                                                                         
-   !                                                                                                                                                                                                                  
+   !1.4 Variables names used for idenfication
+
 
    IF (header) THEN
       novars = novars1
@@ -4133,17 +4118,11 @@ SUBROUTINE read_mpv
       CALL open_filepars(filepars)
    ENDIF
 
-   !                                                                                                                                                                                                                  
-   !1.5 Deallocate                                                                                                                                                                                                    
-   !--------------                                                                                                                                                                                                    
-   !                                                                                                                                                                                                                  
-
+   !1.5 Deallocate
+   !--------------
+   !
    DEALLOCATE (varatts2)
-
-   !                                                                                                                                                                                                                  
-   !2. Read data                                                                                                                                                                                                      
-   !------------                                                                                                                                                                                                      
-   !                                                                                                                                                                                                                  
+   !2. Read data
 
    ivar_210: DO ivar=1,novars
 
@@ -4157,22 +4136,17 @@ SUBROUTINE read_mpv
       END SELECT
 
    ENDDO ivar_210
-
-   !                                                                                                                                                                                                                  
-   !3. Finalise                                                                                                                                                                                                       
-   !-----------                                                                                                                                                                                                       
-   !                                                                                                                                                                                                                  
-   !---close file                                                                                                                                                                                                     
+ 
+   !3. Finalise
+   !---close file
    CALL close_filepars(filepars)
    modfiles(io_modgrd,1,1) = filepars
 
-   !---deallocate                                                                                                                                                                                                     
+   !---deallocate    
    DEALLOCATE (varatts)
 
    CALL log_timer_out()
 
 
    RETURN
-         
-
-
+   
