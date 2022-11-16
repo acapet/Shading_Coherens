@@ -4045,7 +4045,8 @@ SUBROUTINE read_mpv
    !*Local variables
    
    LOGICAL :: header
-   INTEGER :: ivar, nocoords1, nocoords2, novars, novars1, novars2
+   INTEGER, SAVE :: novars, numvars 
+   INTEGER :: ivar, nocoords1, nocoords2, novars1, novars2, numvars1, numvars2
    TYPE (FileParams) :: filepars, filepars1, filepars2
    TYPE (VariableAtts), ALLOCATABLE, DIMENSION(:) :: varatts, varatts1, varatts2
 
@@ -4067,48 +4068,51 @@ SUBROUTINE read_mpv
       CALL open_filepars(filepars1)
       
       !  ---file attributes
-      
       CALL read_glbatts_mod(filepars1)
 
       !  ---variable attributes
       nocoords1 = filepars1%nocoords
       novars1 = filepars1%novars
-      ALLOCATE (varatts1(novars1),STAT=errstat)
-      CALL error_alloc_struc('varatts1',1,(/novars1/),'VariableAtts')
+      numvars1 = nocoords1 + novars1
+      ALLOCATE (varatts1(numvars1),STAT=errstat)
+      CALL error_alloc_struc('varatts1',1,(/numvars1/),'VariableAtts')
       CALL varatts_init(varatts1)
       CALL read_varatts_mod(filepars1,varatts1)
    
    ENDIF
      
-   !!1.2 Model attributes
+!
+!!1.2 Model attributes
+!---------------------
+!
+
    !---file attributes
-   
-   filepars2 = modfiles(io_modgrd,1,1)
-   CALL set_modfiles_atts(io_modgrd,1,1,filepars2)
+   filepars2 = modfiles(io_mpvcov,1,1)
+   CALL set_modfiles_atts(io_mpvcov,1,1,filepars2)
    !
    !---data attributes
    
-    nocoords2 = filepars2%nocoords
-    novars2 = filepars2%novars
-   ALLOCATE (varatts2(novars2),STAT=errstat)
-   CALL error_alloc_struc('varatts2',1,(/novars2/),'VariableAtts')
+   nocoords2 = filepars2%nocoords
+   novars2 = filepars2%novars
+   numvars2 = nocoords2 + novars2
+   ALLOCATE (varatts2(numvars2),STAT=errstat)
+   CALL error_alloc_struc('varatts2',1,(/numvars2/),'VariableAtts')
    CALL varatts_init(varatts2)
-   CALL set_modvars_atts(io_modgrd,1,1,filepars2,novars2,varatts2)
+   CALL set_modvars_atts(io_mpvcov,1,1,filepars2,numvars2,varatts2)
 
    !1.3 Check attributes
    
    IF (header) THEN
       CALL error_value_arr_struc(nocoords1,'modfiles','nocoords',nocoords2,3,&
-                              & (/io_modgrd,1,1/))
-      CALL check_value_varatts(io_modgrd,1,varatts1,varatts2,filepars1,filepars2)
+                              & (/io_mpvcov,1,1/))
+      CALL check_value_varatts(io_mpvcov,1,varatts1,varatts2,filepars1,filepars2)
       CALL error_abort('read_mpv',ierrno_read)
    ENDIF
 
    !1.4 Variables names used for idenfication
 
-
    IF (header) THEN
-      novars = novars1
+      novars = novars1 ; numvars= numvars1
       ALLOCATE (varatts(novars),STAT=errstat)
       CALL error_alloc_struc('varatts',1,(/novars/),'VariableAtts')
       CALL varatts_init(varatts)
@@ -4130,15 +4134,17 @@ SUBROUTINE read_mpv
    !--------------
    !
    DEALLOCATE (varatts2)
-   !2. Read data
-
-   ivar_210: DO ivar=1,novars
+!
+!2. Read data
+!------------
+!
+   ivar_210: DO ivar=1,numvars
 
       SELECT CASE (TRIM(varatts(ivar)%f90_name))
 
    !                                                                                                                                                                                     
       CASE ('mpvcov')
-         CALL read_vars(depmeanglb(1:nc-1,1:nr-1),filepars,ivar,&
+         CALL read_vars(:,:),filepars,ivar,&
                      & (/varatts(ivar)/))
 
       END SELECT
@@ -4148,7 +4154,7 @@ SUBROUTINE read_mpv
    !3. Finalise
    !---close file
    CALL close_filepars(filepars)
-   modfiles(io_modgrd,1,1) = filepars
+   modfiles(io_mpvcov,1,1) = filepars
 
    !---deallocate    
    DEALLOCATE (varatts)
