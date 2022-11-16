@@ -113,6 +113,31 @@ END SUBROUTINE usrdef_weirs
 
 !========================================================================
 
+SUBROUTINE usrdef_mpv
+    !************************************************************************
+    !
+    ! *usrdef_mpv* Define locations and arrays for MPV
+    !
+    ! Author - A. Capet
+    !
+    ! Version - @(COHERENS)Usrdef_Structures.f90  V2.6
+    !
+    ! Description - empty default file
+    !
+    ! Reference -
+    !
+    ! Calling program - initialise_model
+    !
+    !************************************************************************
+    !
+    
+    
+    RETURN
+    
+    END SUBROUTINE usrdef_mpv
+
+!========================================================================
+
 SUBROUTINE usrdef_dischr_spec
 !************************************************************************
 !
