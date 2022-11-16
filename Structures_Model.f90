@@ -3903,3 +3903,108 @@ CALL log_timer_out(npcc,itm_structs)
 RETURN
 
 END SUBROUTINE write_weirs
+
+!! AC 16.11.2022
+
+SUBROUTINE write_mpv
+   !*****************************************************************
+   !
+   ! *write_mpv* Write external file for mpv
+   !
+   ! Author - A. Capet
+   !
+   ! Version - @(COHERENS)Structures_Model.f90 V2.12.1
+   !
+   ! Description - write external files for mpv 
+   !
+   ! Reference -
+   !
+   ! Calling process - define_global_grid
+   !
+   ! Module calls - close_filepars, error_alloc_struc, open_filepars,
+   !                set_modfiles_atts, set_modvars_atts, varatts_init,
+   !                write_atts_mod, write_vars
+   !
+   !*****************************************************************
+   !
+   USE datatypes
+   USE iopars
+   USE paralpars
+   USE structures
+   USE datatypes_init, ONLY: varatts_init
+   USE error_routines, ONLY: error_alloc_struc
+   USE inout_routines, ONLY: close_filepars, open_filepars, write_atts_mod, &
+                           & write_vars
+   USE modvars_routines, ONLY: set_modfiles_atts, set_modvars_atts
+   USE time_routines, ONLY: log_timer_in, log_timer_out
+   
+   IMPLICIT NONE
+   
+   !
+   !* Local variables
+   !
+   INTEGER :: ivar, npcc, numvars
+   TYPE (FileParams) :: filepars
+   TYPE (VariableAtts), ALLOCATABLE, DIMENSION(:) :: varatts
+   
+   
+   IF (.NOT.master) RETURN 
+   
+   procname(pglev+1) = 'write_mpv'
+   CALL log_timer_in(npcc)
+   
+   !
+   !1. Write File Header
+   !--------------------
+   !
+   !---file attributes
+   filepars = modfiles(io_mpvcov,1,2)
+   CALL set_modfiles_atts(io_mpvcov,1,2,filepars)
+   
+   numvars = filepars%novars
+   
+   !---open file
+   CALL open_filepars(filepars)
+   
+   !---variable attributes
+   ALLOCATE (varatts(numvars),STAT=errstat)
+   CALL error_alloc_struc('varatts',1,(/numvars/),'VariableAtts')
+   CALL varatts_init(varatts)
+   CALL set_modvars_atts(io_mpvcov,1,2,filepars,numvars,varatts)
+   
+   !---write
+   CALL write_atts_mod(filepars,varatts)
+    
+   !
+   !2. Write coordinates of dry cells
+   !---------------------------------
+   !
+
+   stop('The function write_mpv in Structures_Model.f90 is not completed')
+   ivar_210: DO ivar=1,numvars
+      SELECT CASE (TRIM(varatts(ivar)%f90_name))
+         CASE ('idry')
+            CALL write_vars(idry,filepars,ivar,(/varatts(ivar)/))
+         CASE ('jdry')
+            CALL write_vars(jdry,filepars,ivar,(/varatts(ivar)/))
+      END SELECT
+   ENDDO ivar_210
+   
+   !
+   !3. Finalise
+   !-----------
+   !
+   
+   CALL close_filepars(filepars)
+   modfiles(io_drycel,1,2) = filepars
+   DEALLOCATE(varatts)
+   
+   CALL log_timer_out(npcc,itm_structs)
+   
+   
+   RETURN
+   
+   END SUBROUTINE write_dry_cells
+
+
+
