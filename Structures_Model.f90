@@ -4055,7 +4055,15 @@ SUBROUTINE read_mpv
  
    !1. Initialise
 
-   filepars1 = modfiles(io_mpvcov,1,1)
+   !1.1 Data attributes                                                                                                                                                                                               
+   !-------------------                                                                                                                                                                                               
+   !
+   header = modfiles(io_mpvcov,1,1)%header
+
+   IF (header) THEN
+
+      !  ---open data file
+      filepars1 = modfiles(io_mpvcov,1,1)
       CALL open_filepars(filepars1)
       
       !  ---file attributes
