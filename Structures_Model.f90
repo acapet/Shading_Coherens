@@ -38,7 +38,7 @@
 !            scalar_discharge, surface_discharge, thin_dams,
 !            update_dischr_data, weirs_bstress, weirs_depth, weirs_loss,
 !            weirs_mask, weirs_sink, write_dischr_data, write_dischr_spec,
-!            write_dry_cells, write_thin_dams, write_weirs
+!            write_dry_cells, write_thin_dams, write_weirs, read_mpv, write_mpv
 !            
 !
 !*****************************************************************
@@ -4005,5 +4005,174 @@ SUBROUTINE write_mpv
    
    END SUBROUTINE write_mpv
 
+SUBROUTINE read_mpv
+   !************************************************************************                                                                                                                                          
+   !                                                                                                                                                                                                                  
+   ! *read_mpv* Read model mpv arrays in standard format                                                                                                                                                            
+   !                                                                                                                                                                                                                  
+   ! Author - A. Capet                                                                                                                                                                                         
+   !                                                                                                                                                                                                                  
+   ! Version - @(COHERENS)Grid_Arrays.f90  V2.12.1                                                                                                                                                                    
+   !                                                                                                                                                                                                                  
+   ! Description -                                                                                                                                                                                                    
+   !                                                                                                                                                                                                                  
+   ! Reference -                                                                                                                                                                                                      
+   !                                                                                                                                                                                                                  
+   ! Calling program - initialise_model                                                                                                                                                                               
+   !                                                                                                                                                                                                                  
+   ! Module calls - check_value_varatts, close_filepars, error_abort,                                                                                                                                                 
+   !                error_alloc_struc, error_value_arr_struc, open_filepars,                                                                                                                                          
+   !                read_glbatts_mod, read_varatts_mod, read_vars,                                                                                                                                                    
+   !                set_modfiles_atts, set_modvars_atts, varatts_init                                                                                                                                                 
+   !                                                                                                                                                                                                                  
+   !************************************************************************                                                                                                                                          
+   !                                                                                                                                                                                                                  
+   USE datatypes
+   USE depths
+   USE grid
+   USE gridpars
+   USE iopars
+   USE check_model, ONLY: check_value_varatts
+   USE datatypes_init, ONLY: varatts_init
+   USE error_routines, ONLY: error_abort, error_alloc_struc, error_value_arr_struc
+   USE inout_routines, ONLY: close_filepars, open_filepars, read_glbatts_mod, &
+                           & read_varatts_mod, read_vars
+   USE modvars_routines, ONLY: set_modfiles_atts, set_modvars_atts
+   USE time_routines, ONLY: log_timer_in, log_timer_out
+   
+   IMPLICIT NONE
+      
+   !                                                                                                                                                                                                                  
+   !*Local variables                                                                                                                                                                                                  
+   !                                                                                                                                                                                                                  
+   !!LOGICAL :: header
+   !!INTEGER :: ivar, nocoords1, nocoords2, novars, novars1, novars2
+   !!TYPE (FileParams) :: filepars, filepars1, filepars2
+   !!TYPE (VariableAtts), ALLOCATABLE, DIMENSION(:) :: varatts, varatts1, varatts2
+
+
+   procname(pglev+1) = 'read_mpv'
+   CALL log_timer_in()
+
+   !                                                                                                                                                                                                                  
+   !1. Initialise                                                                                                                                                                                                     
+   !-------------                                                                                                                                                                                                     
+   !                                                                                                                                                                                                                  
+   !1.1 Data attributes                                                                                                                                                                                               
+   !-------------------                                                                                                                                                                                               
+   !
+   header = modfiles(io_mpvcov,1,1)%header
+
+   IF (header) THEN
+
+   !  ---open data file                                                                                                                                                                                               
+      filepars1 = modfiles(io_mpvcov,1,1)
+      CALL open_filepars(filepars1)
+
+   !  ---file attributes                                                                                                                                                                                              
+      CALL read_glbatts_mod(filepars1)
+
+   !  ---variable attributes                                                                                                                                                                                          
+      nocoords1 = filepars1%nocoords
+      novars1 = filepars1%novars
+      ALLOCATE (varatts1(novars1),STAT=errstat)
+      CALL error_alloc_struc('varatts1',1,(/novars1/),'VariableAtts')
+      CALL varatts_init(varatts1)
+      CALL read_varatts_mod(filepars1,varatts1)
+   
+   ENDIF
+   
+   !!                                                                                                                                                                                                                  
+   !!1.2 Model attributes                                                                                                                                                                                              
+   !!--------------------                                                                                                                                                                                              
+   !!                                                                                                                                                                                                                  
+   !---file attributes                                                                                                                                                                                                
+   filepars2 = modfiles(io_modgrd,1,1)
+   CALL set_modfiles_atts(io_modgrd,1,1,filepars2)
+   ! 
+   !---data attributes                                                                                                                                                                                                
+    nocoords2 = filepars2%nocoords
+    novars2 = filepars2%novars
+   ALLOCATE (varatts2(novars2),STAT=errstat)
+   CALL error_alloc_struc('varatts2',1,(/novars2/),'VariableAtts')
+   CALL varatts_init(varatts2)
+   CALL set_modvars_atts(io_modgrd,1,1,filepars2,novars2,varatts2)
+
+   !                                                                                                                                                                                                                  
+   !1.3 Check attributes                                                                                                                                                                                              
+   !--------------------                                                                                                                                                                                              
+   !                                                                                                                                                                                                                  
+   IF (header) THEN
+      CALL error_value_arr_struc(nocoords1,'modfiles','nocoords',nocoords2,3,&
+                              & (/io_modgrd,1,1/))
+      CALL check_value_varatts(io_modgrd,1,varatts1,varatts2,filepars1,filepars2)
+      CALL error_abort('read_mpv',ierrno_read)
+   ENDIF
+
+   !                                                                                                                                                                                                                  
+   !1.4 Variables names used for idenfication                                                                                                                                                                         
+   !-----------------------------------------                                                                                                                                                                         
+   !                                                                                                                                                                                                                  
+
+   IF (header) THEN
+      novars = novars1
+      ALLOCATE (varatts(novars),STAT=errstat)
+      CALL error_alloc_struc('varatts',1,(/novars/),'VariableAtts')
+      CALL varatts_init(varatts)
+      varatts = varatts1
+      DEALLOCATE (varatts1)
+      filepars = filepars1
+   ELSE
+
+      novars = novars2
+      ALLOCATE (varatts(novars),STAT=errstat)
+      CALL error_alloc_struc('varatts',1,(/novars/),'VariableAtts')
+      CALL varatts_init(varatts1)
+      varatts = varatts2
+      filepars = filepars2
+      CALL open_filepars(filepars)
+   ENDIF
+
+   !                                                                                                                                                                                                                  
+   !1.5 Deallocate                                                                                                                                                                                                    
+   !--------------                                                                                                                                                                                                    
+   !                                                                                                                                                                                                                  
+
+   DEALLOCATE (varatts2)
+
+   !                                                                                                                                                                                                                  
+   !2. Read data                                                                                                                                                                                                      
+   !------------                                                                                                                                                                                                      
+   !                                                                                                                                                                                                                  
+
+   ivar_210: DO ivar=1,novars
+
+      SELECT CASE (TRIM(varatts(ivar)%f90_name))
+
+   !                                                                                                                                                                                     
+      CASE ('mpvcov')
+         CALL read_vars(depmeanglb(1:nc-1,1:nr-1),filepars,ivar,&
+                     & (/varatts(ivar)/))
+
+      END SELECT
+
+   ENDDO ivar_210
+
+   !                                                                                                                                                                                                                  
+   !3. Finalise                                                                                                                                                                                                       
+   !-----------                                                                                                                                                                                                       
+   !                                                                                                                                                                                                                  
+   !---close file                                                                                                                                                                                                     
+   CALL close_filepars(filepars)
+   modfiles(io_modgrd,1,1) = filepars
+
+   !---deallocate                                                                                                                                                                                                     
+   DEALLOCATE (varatts)
+
+   CALL log_timer_out()
+
+
+   RETURN
+         
 
 
