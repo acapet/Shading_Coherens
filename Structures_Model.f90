@@ -4144,7 +4144,7 @@ SUBROUTINE read_mpv
 
    !                                                                                                                                                                                     
       CASE ('mpvcov')
-         CALL read_vars(:,:),filepars,ivar,&
+         CALL read_vars(mpvcov(:,:),filepars,ivar,&
                      & (/varatts(ivar)/))
 
       END SELECT
