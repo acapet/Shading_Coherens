@@ -4141,10 +4141,9 @@ SUBROUTINE read_mpv
    ivar_210: DO ivar=1,numvars
 
       SELECT CASE (TRIM(varatts(ivar)%f90_name))
-
-   !                                                                                                                                                                                     
+                                                                                                                                                           
       CASE ('mpvcov')
-         CALL read_vars(mpvcov(:,:),filepars,ivar,&
+         CALL read_vars(mpvcov,filepars,ivar,&
                      & (/varatts(ivar)/))
 
       END SELECT
