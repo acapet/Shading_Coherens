@@ -3976,11 +3976,10 @@ SUBROUTINE write_mpv
    CALL write_atts_mod(filepars,varatts)
     
    !
-   !2. Write coordinates of dry cells
+   !2. Write partial cover of MPV
    !---------------------------------
    !
-
-   stop('The function write_mpv in Structures_Model.f90 is not completed')
+   ! AC 16.11.2022 ('The function write_mpv in Structures_Model.f90 is not completed')
    ivar_210: DO ivar=1,numvars
       SELECT CASE (TRIM(varatts(ivar)%f90_name))
          CASE ('idry')
@@ -3996,7 +3995,7 @@ SUBROUTINE write_mpv
    !
    
    CALL close_filepars(filepars)
-   modfiles(io_drycel,1,2) = filepars
+   modfiles(io_mpvcov,1,2) = filepars
    DEALLOCATE(varatts)
    
    CALL log_timer_out(npcc,itm_structs)
@@ -4004,7 +4003,7 @@ SUBROUTINE write_mpv
    
    RETURN
    
-   END SUBROUTINE write_dry_cells
+   END SUBROUTINE write_mpv
 
 
 
