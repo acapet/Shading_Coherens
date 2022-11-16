@@ -4045,10 +4045,10 @@ SUBROUTINE read_mpv
    !                                                                                                                                                                                                                  
    !*Local variables                                                                                                                                                                                                  
    !                                                                                                                                                                                                                  
-   !!LOGICAL :: header
-   !!INTEGER :: ivar, nocoords1, nocoords2, novars, novars1, novars2
-   !!TYPE (FileParams) :: filepars, filepars1, filepars2
-   !!TYPE (VariableAtts), ALLOCATABLE, DIMENSION(:) :: varatts, varatts1, varatts2
+   LOGICAL :: header
+   INTEGER :: ivar, nocoords1, nocoords2, novars, novars1, novars2
+   TYPE (FileParams) :: filepars, filepars1, filepars2
+   TYPE (VariableAtts), ALLOCATABLE, DIMENSION(:) :: varatts, varatts1, varatts2
 
 
    procname(pglev+1) = 'read_mpv'
