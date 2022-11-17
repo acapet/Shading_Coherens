@@ -76,7 +76,7 @@ INTEGER, PARAMETER :: MaxMGLevels = 5
 
 !---model variables
 INTEGER, PARAMETER :: &
-     & MaxModArids = 550, MaxBioArids = 35, MaxSedArids = 226, &
+     & MaxModArids = 551, MaxBioArids = 35, MaxSedArids = 226, &
      & MaxPartArids = 41, &
      & MaxTotArids = MaxModArids + MaxSedArids + MaxBioArids + MaxPartArids
 
@@ -84,7 +84,7 @@ INTEGER, PARAMETER :: &
 INTEGER, PARAMETER :: MaxCIFTypes = 17, MaxCIFVars = 500, MaxGlbAtts = 20, &
                     & MaxGridTypes = 5, MaxGridFiles = 2, MaxInitFiles = 5, &
                     & MaxIOCoords = 8, MaxIODims = 20, MaxIOFiles = 33, &
-                    & MaxIOTypes = 51, MaxProgLevels  = 20, MaxRestarts = 10, &
+                    & MaxIOTypes = 52, MaxProgLevels  = 20, MaxRestarts = 10, &
                     & MaxSubVars = 50, MaxVarDims = 6
 
 !---monitoring files and error coding

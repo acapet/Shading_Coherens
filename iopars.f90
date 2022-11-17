@@ -94,7 +94,8 @@ INTEGER, PARAMETER :: io_nstspc = 26, io_2uvnst = 27, io_2xynst = 28, &
 INTEGER, PARAMETER :: io_metsur = 35, io_sstsur = 36, io_wavsur = 37, &
                     & io_parsur = 38
 !---structures
-INTEGER, PARAMETER :: io_drycel = 39, io_thndam = 40, io_weibar = 41
+INTEGER, PARAMETER :: io_drycel = 39, io_thndam = 40, io_weibar = 41, &
+                    & io_mpvcov = 52 ! AC 16.11.2022
 !---discharges
 INTEGER, PARAMETER :: io_disspc = 42, io_disloc = 43, io_disvol = 44 , &
                     & io_discur = 45, io_dissal = 46, io_dissed = 47, &
@@ -114,7 +115,7 @@ CHARACTER (LEN=6), DIMENSION(MaxIOTypes) :: modfiles_desc = &
 &    'bioobc','nstspc','2uvnst','2xynst','3uvnst','3xynst','salnst','tmpnst',&
 &    'sednst','bionst','metsur','sstsur','wavsur','biosur','drycel','thndam',&
 &    'weibar','disspc','disloc','disvol','discur','dissal','dissed','distmp',&
-&    'parcld','pargrd','parphs'/)
+&    'parcld','pargrd','parphs','mpvcov'/)
 
 !---key ids for initial conditions
 INTEGER, PARAMETER :: ics_phys = 1, ics_sed = 2, ics_morph = 3, ics_part = 4, &
