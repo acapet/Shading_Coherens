@@ -4074,26 +4074,30 @@ SUBROUTINE read_mpv
 
       !  ---variable attributes
       nocoords1 = filepars1%nocoords
+      write(*,*) "nocoords1 : ", nocoords1
       novars1 = filepars1%novars
+
+      write(*,*) "novars1 : ", novars1
       numvars1 = nocoords1 + novars1
+
       ALLOCATE (varatts1(numvars1),STAT=errstat)
       CALL error_alloc_struc('varatts1',1,(/numvars1/),'VariableAtts')
       CALL varatts_init(varatts1)
       CALL read_varatts_mod(filepars1,varatts1)
    
+      write(*,*) varatts1
    ENDIF
      
 !
 !!1.2 Model attributes
 !---------------------
 !
-
    !---file attributes
    filepars2 = modfiles(io_mpvcov,1,1)
    CALL set_modfiles_atts(io_mpvcov,1,1,filepars2)
+
    !
-   !---data attributes
-   
+   !---data attributes   
    nocoords2 = filepars2%nocoords
    novars2 = filepars2%novars
    numvars2 = nocoords2 + novars2
@@ -4101,6 +4105,8 @@ SUBROUTINE read_mpv
    CALL error_alloc_struc('varatts2',1,(/numvars2/),'VariableAtts')
    CALL varatts_init(varatts2)
    CALL set_modvars_atts(io_mpvcov,1,1,filepars2,numvars2,varatts2)
+
+   write(*,*) "varatts2", varatts2
 
    !1.3 Check attributes
    
