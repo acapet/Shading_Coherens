@@ -300,10 +300,6 @@ IF (iopt_mpvcov.EQ.1) THEN
    ALLOCATE (mpvcov(ncloc,nrloc),STAT=errstat)
    CALL error_alloc('mpvcov',2,(/ncloc,nrloc/),kndrtype)
    mpvcov = 0.0
-
-   write(*,*) "After alloc and init, mpvcov(40,40)", mpvcov(40,40)
-   write(*,*) "After alloc and init, maxval(mpvcov)", maxval(mpvcov)
-   
 ENDIF
 
 CALL log_timer_out(npcc,itm_structs)
@@ -4038,6 +4034,8 @@ SUBROUTINE read_mpv
    USE grid
    USE gridpars
    USE iopars
+   USE syspars
+   USE timepars
    USE check_model, ONLY: check_value_varatts
    USE datatypes_init, ONLY: varatts_init
    USE error_routines, ONLY: error_abort, error_alloc_struc, error_value_arr_struc
@@ -4045,6 +4043,8 @@ SUBROUTINE read_mpv
                            & read_varatts_mod, read_vars
    USE modvars_routines, ONLY: set_modfiles_atts, set_modvars_atts
    USE time_routines, ONLY: log_timer_in, log_timer_out
+
+   USE inout_paral, ONLY: read_distribute_mod
    
    IMPLICIT NONE
 
@@ -4056,6 +4056,8 @@ SUBROUTINE read_mpv
    TYPE (FileParams) :: filepars, filepars1, filepars2
    TYPE (VariableAtts), ALLOCATABLE, DIMENSION(:) :: varatts, varatts1, varatts2
 
+   INTEGER, DIMENSION(2) :: lbounds, ubounds
+   INTEGER, DIMENSION(4) :: nhdims
 
    procname(pglev+1) = 'read_mpv'
    CALL log_timer_in()
@@ -4077,14 +4079,13 @@ SUBROUTINE read_mpv
 
       !  ---variable attributes
       nocoords1 = filepars1%nocoords
-      write(*,*) "nocoords1 : ", nocoords1
       novars1 = filepars1%novars
 
-      write(*,*) "novars1 : ", novars1
       numvars1 = nocoords1 + novars1
 
+      !! AC 09.12.2022
       !! nocoords is read from the netcdf file, which includes coordinates variables.
-      !! Yet for some reason, the check protocols assumes that nocoord > 0, automatially involves a time dimensions
+      !! Yet for some reason, the check protocols assumes that nocoord > 0 automatially involves a time dimensions
       !! For now, I'll attempt forcing nocoords to zero
       nocoords1 = 0
       
@@ -4092,13 +4093,6 @@ SUBROUTINE read_mpv
       CALL error_alloc_struc('varatts1',1,(/numvars1/),'VariableAtts')
       CALL varatts_init(varatts1)
       CALL read_varatts_mod(filepars1,varatts1)
-
-      DO ivar = 1, numvars1
-         write(*,*) " varatts1(ivar)%f90_name  : ", varatts1(ivar)%f90_name
-         write(*,*) " varatts1(ivar)%kind_type : ", varatts1(ivar)%kind_type
-         write(*,*) " varatts1(ivar)%nrank     : ", varatts1(ivar)%nrank
-         write(*,*) " varatts1(ivar)%shape     : ", varatts1(ivar)%global_dims
-      enddo
      
    ENDIF
      
@@ -4113,25 +4107,15 @@ SUBROUTINE read_mpv
    !
    !---data attributes   
    nocoords2 = filepars2%nocoords
-   write(*,*) "nocoords2 : ", nocoords2
 
    novars2 = filepars2%novars
-   write(*,*) "novars2   : ", novars2
 
    numvars2 = nocoords2 + novars2
+   
    ALLOCATE (varatts2(numvars2),STAT=errstat)
    CALL error_alloc_struc('varatts2',1,(/numvars2/),'VariableAtts')
    CALL varatts_init(varatts2)
    CALL set_modvars_atts(io_mpvcov,1,1,filepars2,numvars2,varatts2)
-
-   DO ivar = 1, numvars2
-      write(*,*) " varatts2(ivar)%f90_name    : " , varatts2(ivar)%f90_name
-      write(*,*) " varatts2(ivar)%kind_type   : " , varatts2(ivar)%kind_type
-      write(*,*) " varatts2(ivar)%nrank       : " , varatts2(ivar)%nrank
-      write(*,*) " varatts2(ivar)%global_dims : " , varatts2(ivar)%global_dims
-      !         write(*,*) " varatts1(ivar)%shape", varatts1(ivar)%shape
-   enddo
-
 
    !1.3 Check attributes
    
@@ -4153,7 +4137,6 @@ SUBROUTINE read_mpv
       DEALLOCATE (varatts1)
       filepars = filepars1
    ELSE
-
       novars = novars2
       ALLOCATE (varatts(novars),STAT=errstat)
       CALL error_alloc_struc('varatts',1,(/novars/),'VariableAtts')
@@ -4171,24 +4154,20 @@ SUBROUTINE read_mpv
 !2. Read data
 !------------
 !
-
-   write(*,*) "BEFORE READING mpvcov(40,40)", mpvcov(40,40)
-   write(*,*) "BEFORE READING max(mpvcov)", maxval(mpvcov)
-
    
    ivar_210: DO ivar=1,numvars
       SELECT CASE (TRIM(varatts(ivar)%f90_name))                                                                                                                                                           
       CASE ('mpvcov')
-         write(*,*) 'ivar in read select ', ivar
-         CALL read_vars(mpvcov,filepars,ivar,(/varatts(ivar)/))
+         nhdims = 0
+         lbounds = 1
+         ubounds = (/nc,nr/)
+         CALL read_distribute_mod(mpvcov,filepars,ivar,&
+              & lbounds,ubounds,nhdims,'C  ',.TRUE.,&
+              & (/varatts(ivar)/))
 
       END SELECT
 
    ENDDO ivar_210
-
-   write(*,*) "AFTER READING mpvcov(40,40)", mpvcov(40,40)
-   write(*,*) "AFTER READING max(mpvcov)", maxval(mpvcov)
-
    
    !3. Finalise
    !---close file
@@ -4199,7 +4178,6 @@ SUBROUTINE read_mpv
    DEALLOCATE (varatts)
 
    CALL log_timer_out()
-
 
    RETURN
    

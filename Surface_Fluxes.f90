@@ -976,6 +976,7 @@ USE syspars
 USE timepars
 USE error_routines, ONLY: error_alloc
 USE time_routines, ONLY: day_number, leap_year, log_timer_in, log_timer_out
+USE structures, ONLY: mpvcov
 
 IMPLICIT NONE
 
@@ -995,8 +996,7 @@ REAL, DIMENSION(3) :: aeq = (/0.0072,-0.0528,-0.0012/),&
 REAL, SAVE, ALLOCATABLE, DIMENSION(:,:) :: albedo_cs, altmax, array2dc, &
                                          & cloudcorr, fabsorb, hoursol, sinalt
 
-INTEGER :: i, j
-REAL    :: xc, yc, xl, xu, yl, yu, dx, dy
+INTEGER :: i, j 
 
 !
 ! Name        Type    Purpose
@@ -1156,32 +1156,21 @@ ELSEIF (iopt_sflux_qshort.EQ.3) THEN
 
 ENDIF
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!! AC perturb qrad : first attempt !!
-xl  = 2.2887514
-xu  = 2.3835366
-yl  = 51.300006
-yu  = 51.36
+!! AC Nov'22 :  MPV perturbation of incoming solar radiation !!
+IF (iopt_mpvcov.EQ.1) THEN
+   i_210: DO i=1,ncloc
+      j_210: DO j=1,nrloc
+         IF (maskatc_int(i,j)) THEN
+            qrad(i,j) = qrad(i,j) * (1-mpvcov(i,j))
+         endif
+      enddo j_210
+   enddo i_210
+endif
 
-i_210: DO i=1,ncloc
-j_210: DO j=1,nrloc
-   IF (maskatc_int(i,j)) THEN
-      xc = 0.5*(gxcoord(i,j)+gxcoord(i+1,j))
-      yc = 0.5*(gycoord(i,j)+gycoord(i+1,j))
-      IF ((xc.LT.xu).and.(xc.GT.xl).and.(yc.LT.yu).and.(yc.GT.yl)) THEN
-         dx=min(xc-xl,xu-xc)
-         dy=min(yc-yl,yu-yc)
-         qrad(i,j) = qrad(i,j) * (1-0.18)
-      ENDIF
-   ENDIF
-ENDDO j_210
-ENDDO i_210
-!! !! !! !! !! !! !! !! !! !! !! !! !! 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! !! !! !! !! !! !! !! !! !! !! !! !!
 
 
-
-   
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
 !
 !4. Deallocate arrays
 !--------------------

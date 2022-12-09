@@ -3875,7 +3875,7 @@ CASE (iarr_mpvcov)
    unit = '-'
    nodim = 2
    nldims(1:2) = (/ncloc,nrloc/)
-   ngdims(1:2) = (/nc-1,nr-1/)
+   ngdims(1:2) = (/nc,nr/)
 !
 !3.15 Discharges
 !---------------
@@ -8206,8 +8206,8 @@ CASE (io_weibar)
 
 CASE (io_mpvcov)
    nodims        = 2
-   dimvals(1:2)  = (/nc-1,nr-1/)
-   dimnames(1:2) = (/'nc-1','nr-1'/)
+   dimvals(1:2)  = (/nc,nr/)
+   dimnames(1:2) = (/'nc','nr'/)
    ivar          = 1
    ivarid(1)     = iarr_mpvcov
    nrank(1)      = 2
