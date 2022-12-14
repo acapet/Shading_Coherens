@@ -71,7 +71,7 @@ INTEGER :: iproc
 !1. Cold/warm start
 !------------------
 
-IF (ciffile%status.EQ.'W') then
+IF (ciffile%status.EQ.'W') then ! (.TRUE.) then !
    write(*,*) "It s a cold start"
    cold_start = .TRUE.
 else
@@ -108,6 +108,7 @@ levtimer = 3
 !-----------------
 
 IF (npworld.GT.1) nprocscoh = 9
+
 
 RETURN
 
@@ -166,16 +167,6 @@ modform = 'N'
 
 !AC 280922
 !sflag = MERGE(.TRUE.,.FALSE.,runtitle(6:6).EQ.'0')
-
-
-iopt_MPI_sync = 1
-
-iopt_MPI_comm_scat = 1
-iopt_MPI_comm_gath = 1
-iopt_MPI_comm_exch = 1
-iopt_MPI_comm_all  = 1
-
-iopt_MPI_abort = 0
 
 !
 !2. Process numbers
@@ -251,7 +242,7 @@ iopt_astro_pars = 1
 !
 !---Start/End date (YYYY/MM/DD HH:MM:SS,mmm)
 CStartDateTime(1:19) = '2007/01/01;00:00:00'
-CEndDateTime(1:19)   = '2007/03/01;00:00:00'
+CEndDateTime(1:19)   = '2008/01/01;00:00:00'
 
 !---time step
 read( runtitle(6:6),*) runid
@@ -319,7 +310,7 @@ modfiles(io_inicon,1,1)%form = 'N'
 modfiles(io_2uvobc,1,1)%status = 'N'
 
 
-! METEO
+!---atmospheric forcings
 iopt_meteo        = 1
 iopt_meteo_data   = 1
 iopt_meteo_stres  = 1
@@ -327,7 +318,6 @@ iopt_meteo_heat   = 1
 iopt_meteo_precip = 0
 
 iopt_sflux_qshort = 1
-
 ! iopt_obc_invbar = 1
  
 !! Meteo files (ERA5) !!
@@ -335,8 +325,8 @@ IF (iopt_meteo.EQ.1)THEN
 !   WRITE (cyear,'(I4.4)') iyear
    modfiles(io_metsur,1,1)%status = 'N'
    modfiles(io_metsur,1,1)%form   = 'N'
-   modfiles(io_metsur,1,1)%filename = '/home/acapet/Shading_test/BCZ_2007.nc' !'/home/ulg/mast/acapet/Coherens_Forcings/Shading_2007/BCZ_2007.nc'
-   modfiles(io_metsur,1,1)%tlims = (/0,int_fill,450/)
+   modfiles(io_metsur,1,1)%filename = '/home/ulg/mast/acapet/Coherens_Forcings/Shading_2007/BCZ_2007.nc'! !/home/acapet/Shading_test/BCZ_2007.nc'
+   modfiles(io_metsur,1,1)%tlims = (/0,int_fill,45/)
 
 !---meteo grid (ecmwf)                                                                                                                                                                                            
    surfacegrids(igrd_meteo,1)%nhtype = 1
@@ -348,7 +338,14 @@ IF (iopt_meteo.EQ.1)THEN
    surfacegrids(igrd_meteo,1)%delydat = 0.25
 ENDIF
 
+!---structure (netcdf input file for MPV partial coverage)
+iopt_mpvcov       = 1
 
+IF (iopt_mpvcov.EQ.1) then
+   modfiles(io_mpvcov,1,1)%status    = 'R'
+   modfiles(io_mpvcov,1,1)%form      = 'N'
+   modfiles(io_mpvcov,1,1)%filename  = '/home/ulg/mast/acapet/Coherens_Forcings/MPVcovFirstEXT.nc'
+endif
 
 !6.2 Output
 !----------
@@ -439,6 +436,12 @@ USE grid
 USE gridpars
 USE iopars
 USE time_routines, ONLY: log_timer_in, log_timer_out
+
+!
+!*Local variables
+!
+INTEGER :: l
+
 
 
 procname(pglev+1) = 'usrdef_grid'
@@ -537,7 +540,7 @@ IMPLICIT NONE
 !*Local variables
 !
 INTEGER :: i, j
-REAL :: s, sl, sr, xc, xl, xr
+REAL :: t, tl, dtemp, xc, yc, xl, xu, yl, yu, dx, dy
 INTEGER, DIMENSION(3) :: lbounds
 INTEGER, DIMENSION(4) :: nhexch
 
@@ -559,25 +562,32 @@ CALL log_timer_in()
 !iopt_out_anal = 1
 
 !
-!2. Salinity
+!2. Temperature
 !-----------
 !
 
-sl = 34.8; sr = 35.0
-xl = 25000.0; xr = 45000.0
+tl = 16.0; dtemp = 6.0
+!xmid= gxcoord(int(ncloc/2),int(nrloc/2))
+!ymid= gxcoord(int(ncloc/2),int(nrloc/2))
+
+xl  = 2.25
+xu  = 2.45
+yl  = 51.25
+yu  = 51.45
 
 i_210: DO i=1,ncloc
 j_210: DO j=1,nrloc
    IF (maskatc_int(i,j)) THEN
       xc = 0.5*(gxcoord(i,j)+gxcoord(i+1,j))
-      IF (xc.LT.xl) THEN
-         s = sl
-      ELSEIF (xc.GT.xr) THEN
-         s = sr
+      yc = 0.5*(gycoord(i,j)+gycoord(i+1,j))
+      IF ((xc.LT.xu).and.(xc.GT.xl).and.(yc.LT.yu).and.(yc.GT.yl)) THEN
+         dx=min(xc-xl,xu-xc)
+         dy=min(yc-yl,yu-yc)
+         t = tl + dtemp * min(dx,dy)/0.10
       ELSE
-         s = (sr-sl)*(xc-xl)/(xr-xl)+sl
+         t = tl
       ENDIF
-      sal(i,j,:) = s
+      temp(i,j,:) = t
    ENDIF
 ENDDO j_210
 ENDDO i_210
@@ -588,9 +598,8 @@ ENDDO i_210
 !
 
 IF (iopt_MPI.EQ.1) THEN
-   write(*,*) 'AC: iopt_MPI was 1. Nhalo:', nhalo, 'nhdens', nhdens
    lbounds = (/1-nhalo,1-nhalo,1/); nhexch = nhdens
-   CALL exchange_mod(sal,lbounds,nhexch,iarr_sal)
+   CALL exchange_mod(temp,lbounds,nhexch,iarr_temp)
 ENDIF
 
 CALL log_timer_out()
@@ -683,8 +692,8 @@ ityp2dobu(nr:2*(nr-1)) = 13
 iloczobu = 1; iloczobv = 1
 
 !---amplitudes
-crad = SQRT(gacc_mean*depmean_cst)
-amp = 0.8
+crad  = SQRT(gacc_mean*depmean_cst)
+amp   = 0.8
 phase = -halfpi
 udatobu_amp(1:(nr-1),1) = crad*amp
 zdatobu_amp(1:(nr-1),1) = amp
